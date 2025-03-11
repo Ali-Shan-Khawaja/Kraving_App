@@ -1,0 +1,798 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "This template creates vpc with public and private subnets",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "VPC CIDR"
+                    },
+                    "Parameters": [
+                        "VpcCIDR"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Subnet CIDR"
+                    },
+                    "Parameters": [
+                        "PublicSubnet1CIDR",
+                        "PublicSubnet2CIDR",
+                        "PrivateSubnet1CIDR"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "SSH CIDR"
+                    },
+                    "Parameters": [
+                        "SSHLocation"
+                    ]
+                }
+            ]
+        }
+    },
+    "Parameters": {
+        "VpcCIDR": {
+            "Default": "192.111.0.0/16",
+            "Description": "Please enter the IP range (CIDR notation) for this VPC",
+            "Type": "String"
+        },
+        "PublicSubnet1CIDR": {
+            "Default": "192.111.2.0/24",
+            "Description": "Please enter the IP range (CIDR notation) for the public subnet 1",
+            "Type": "String"
+        },
+        "PublicSubnet2CIDR": {
+            "Default": "192.111.4.0/24",
+            "Description": "Please enter the IP range (CIDR notation) for the public subnet 2",
+            "Type": "String"
+        },
+        "PrivateSubnet1CIDR": {
+            "Default": "192.111.1.0/24",
+            "Description": "Please enter the IP range (CIDR notation) for the private subnet 1",
+            "Type": "String"
+        },
+        "SSHLocation": {
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+            "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x.",
+            "Default": "0.0.0.0/0",
+            "Description": "The IP address range that can be used to access the web server using SSH.",
+            "MaxLength": "18",
+            "MinLength": "9",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "VPC": {
+            "Type": "AWS::EC2::VPC",
+            "Properties": {
+                "CidrBlock": {
+                    "Ref": "VpcCIDR"
+                },
+                "EnableDnsHostnames": true,
+                "EnableDnsSupport": true,
+                "InstanceTenancy": "default",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Kraving VPC"
+                    }
+                ]
+            }
+        },
+        "PublicSubnet1": {
+            "Type": "AWS::EC2::Subnet",
+            "DependsOn": "VPC",
+            "Properties": {
+                "AvailabilityZone": {
+                    "Fn::Select": [
+                        0,
+                        {
+                            "Fn::GetAZs": ""
+                        }
+                    ]
+                },
+                "CidrBlock": {
+                    "Ref": "PublicSubnet1CIDR"
+                },
+                "MapPublicIpOnLaunch": true,
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Public Subnet 1"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            }
+        },
+        "PublicSubnet2": {
+            "Type": "AWS::EC2::Subnet",
+            "DependsOn": "VPC",
+            "Properties": {
+                "AvailabilityZone": {
+                    "Fn::Select": [
+                        1,
+                        {
+                            "Fn::GetAZs": ""
+                        }
+                    ]
+                },
+                "CidrBlock": {
+                    "Ref": "PublicSubnet2CIDR"
+                },
+                "MapPublicIpOnLaunch": true,
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Public Subnet 2"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            }
+        },
+        "PrivateSubnet1": {
+            "Type": "AWS::EC2::Subnet",
+            "DependsOn": "VPC",
+            "Properties": {
+                "AvailabilityZone": {
+                    "Fn::Select": [
+                        0,
+                        {
+                            "Fn::GetAZs": ""
+                        }
+                    ]
+                },
+                "CidrBlock": {
+                    "Ref": "PrivateSubnet1CIDR"
+                },
+                "MapPublicIpOnLaunch": false,
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Private Subnet 1"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            }
+        },
+        "InternetGateway": {
+            "Type": "AWS::EC2::InternetGateway",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Kraving IGW"
+                    }
+                ]
+            }
+        },
+        "InternetGatewayAttachment": {
+            "Type": "AWS::EC2::VPCGatewayAttachment",
+            "DependsOn": "InternetGateway",
+            "Properties": {
+                "InternetGatewayId": {
+                    "Ref": "InternetGateway"
+                },
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            }
+        },
+        "MyEIP": {
+            "Type": "AWS::EC2::EIP",
+            "DependsOn": "VPC",
+            "Properties": {
+                "Domain": {
+                    "Ref": "VPC"
+                }
+            }
+        },
+        "NatGateway": {
+            "Type": "AWS::EC2::NatGateway",
+            "DependsOn": [
+                "PublicSubnet1",
+                "MyEIP"
+            ],
+            "Properties": {
+                "AllocationId": {
+                    "Fn::GetAtt": [
+                        "MyEIP",
+                        "AllocationId"
+                    ]
+                },
+                "SubnetId": {
+                    "Ref": "PublicSubnet1"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Kraving NAT Gateway"
+                    }
+                ]
+            }
+        },
+        "PublicRouteTable1": {
+            "Type": "AWS::EC2::RouteTable",
+            "DependsOn": "VPC",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "PublicRouteTable1"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            }
+        },
+        "PublicRouteTable2": {
+            "Type": "AWS::EC2::RouteTable",
+            "DependsOn": "VPC",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "PublicRouteTable2"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            }
+        },
+        "PrivateRouteTable1": {
+            "Type": "AWS::EC2::RouteTable",
+            "DependsOn": "VPC",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "PrivateRouteTable1"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            }
+        },
+        "PublicSubnet1RouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "DependsOn": [
+                "PublicRouteTable1",
+                "PublicSubnet1",
+                "InternetGatewayAttachment"
+            ],
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PublicRouteTable1"
+                },
+                "SubnetId": {
+                    "Ref": "PublicSubnet1"
+                }
+            }
+        },
+        "PublicSubnet2RouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "DependsOn": [
+                "PublicRouteTable2",
+                "PublicSubnet2",
+                "InternetGatewayAttachment"
+            ],
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PublicRouteTable2"
+                },
+                "SubnetId": {
+                    "Ref": "PublicSubnet2"
+                }
+            }
+        },
+        "PrivateSubnet1RouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "DependsOn": [
+                "PrivateRouteTable1",
+                "PrivateSubnet1"
+            ],
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PrivateRouteTable1"
+                },
+                "SubnetId": {
+                    "Ref": "PrivateSubnet1"
+                }
+            }
+        },
+        "InternetgatewayRoutePiblicSubnet1": {
+            "Type": "AWS::EC2::Route",
+            "DependsOn": [
+                "InternetGateway",
+                "PublicRouteTable1"
+            ],
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "RouteTableId": {
+                    "Ref": "PublicRouteTable1"
+                },
+                "GatewayId": {
+                    "Ref": "InternetGateway"
+                }
+            }
+        },
+        "InternetgatewayRoutePiblicSubnet2": {
+            "Type": "AWS::EC2::Route",
+            "DependsOn": [
+                "InternetGateway",
+                "PublicRouteTable2",
+                "InternetGatewayAttachment"
+            ],
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "RouteTableId": {
+                    "Ref": "PublicRouteTable2"
+                },
+                "GatewayId": {
+                    "Ref": "InternetGateway"
+                }
+            }
+        },
+        "NatgatewayRoutePrivateSubnet1": {
+            "Type": "AWS::EC2::Route",
+            "DependsOn": [
+                "NatGateway",
+                "PrivateRouteTable1",
+                "InternetGatewayAttachment"
+            ],
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "RouteTableId": {
+                    "Ref": "PrivateRouteTable1"
+                },
+                "NatGatewayId": {
+                    "Ref": "NatGateway"
+                }
+            }
+        },
+        "ALBSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "DependsOn": "VPC",
+            "Properties": {
+                "GroupDescription": "Enable All Traffic",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ALBSecurityGroup"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            }
+        },
+        "EC2SecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "DependsOn": "VPC",
+            "Properties": {
+                "GroupDescription": "Enable All Traffic",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "-1",
+                        "CidrIp": "0.0.0.0/0"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "EC2SecurityGroup"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            }
+        },
+        "KravingEC2": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": "ami-0c02fb55956c7d316",
+                "KeyName": "KravingEC2",
+                "InstanceType": "t2.micro",
+                "NetworkInterfaces": [
+                    {
+                        "AssociatePublicIpAddress": "false",
+                        "DeviceIndex": 0,
+                        "GroupSet": [
+                            {
+                                "Ref": "EC2SecurityGroup"
+                            }
+                        ],
+                        "SubnetId": {
+                            "Ref": "PrivateSubnet1"
+                        }
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "KravingEC2"
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join" : [ "\n", [
+                           "#!/bin/bash",
+                            "yum update -y",
+                            "yum install -y git",
+                            "yum install -y docker",
+                            "systemctl enable docker",
+                            "systemctl restart docker",
+                            "docker login --username $(username) --password $(Password)",
+                            "sudo curl -L https://github.com/docker/compose/releases/download/1.28.3/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose",
+                            "sudo chmod +x /usr/local/bin/docker-compose",
+                            "sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose",
+                            "git clone $(Repo_URL)",
+                            "cd cloud_compose" ] ]
+                    }
+                }
+            },
+            "DependsOn": [
+                "PrivateSubnet1",
+                "EC2SecurityGroup"
+            ]
+        },
+        "MyTargetGroup1": {
+            "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+            "DependsOn": [
+                "KravingEC2"
+            ],
+            "Properties": {
+                "HealthCheckEnabled": true,
+                "Name": "Kraving-22",
+                "TargetType": "instance",
+                "VpcId": {
+                    "Ref": "VPC"
+                },
+                "Port": 22,
+                "Protocol": "TCP",
+                "Targets": [
+                    {
+                        "Id": {
+                            "Ref": "KravingEC2"
+                        },
+                        "Port": 22
+                    }
+                ]
+            }
+        },
+        "MyTargetGroup2": {
+            "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+            "DependsOn": [
+                "KravingEC2"
+            ],
+            "Properties": {
+                "HealthCheckEnabled": true,
+                "Name": "Kraving-4200",
+                "TargetType": "instance",
+                "VpcId": {
+                    "Ref": "VPC"
+                },
+                "Port": 80,
+                "Protocol": "HTTP",
+                "Targets": [
+                    {
+                        "Id": {
+                            "Ref": "KravingEC2"
+                        },
+                        "Port": 4200
+                    }
+                ]
+            }
+        },
+        "MyTargetGroup3": {
+            "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+            "DependsOn": [
+                "KravingEC2"
+            ],
+            "Properties": {
+                "HealthCheckEnabled": true,
+                "Name": "Kraving-5000",
+                "TargetType": "instance",
+                "VpcId": {
+                    "Ref": "VPC"
+                },
+                "Port": 8080,
+                "Protocol": "HTTP",
+                "Targets": [
+                    {
+                        "Id": {
+                            "Ref": "KravingEC2"
+                        },
+                        "Port": 5000
+                    }
+                ]
+            }
+        },
+        "NLB": {
+            "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+            "DependsOn": [
+                "InternetgatewayRoutePiblicSubnet2",
+                "InternetgatewayRoutePiblicSubnet1"
+            ],
+            "Properties": {
+                "Name": "NLB-Kraving-22",
+                "Scheme": "internet-facing",
+                "Subnets": [
+                    {
+                        "Ref": "PublicSubnet1"
+                    },
+                    {
+                        "Ref": "PublicSubnet2"
+                    }
+                ],
+                "Type": "network"
+            }
+        },
+        "ALB": {
+            "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+            "DependsOn": [
+                "InternetgatewayRoutePiblicSubnet2",
+                "InternetgatewayRoutePiblicSubnet1"
+            ],
+            "Properties": {
+                "Name": "ALB-Kraving",
+                "SecurityGroups": [
+                    {
+                        "Ref": "ALBSecurityGroup"
+                    }
+                ],
+                "Scheme": "internet-facing",
+                "Subnets": [
+                    {
+                        "Ref": "PublicSubnet1"
+                    },
+                    {
+                        "Ref": "PublicSubnet2"
+                    }
+                ],
+                "Type": "application"
+            }
+        },
+        "HTTPlistener1": {
+            "Type": "AWS::ElasticLoadBalancingV2::Listener",
+            "Properties": {
+                "DefaultActions": [
+                    {
+                        "Type": "forward",
+                        "TargetGroupArn": {
+                            "Ref": "MyTargetGroup2"
+                        }
+                    }
+                ],
+                "LoadBalancerArn": {
+                    "Ref": "ALB"
+                },
+                "Port": 80,
+                "Protocol": "HTTP"
+            }
+        },
+        "HTTPlistener2": {
+            "Type": "AWS::ElasticLoadBalancingV2::Listener",
+            "Properties": {
+                "DefaultActions": [
+                    {
+                        "Type": "forward",
+                        "TargetGroupArn": {
+                            "Ref": "MyTargetGroup3"
+                        }
+                    }
+                ],
+                "LoadBalancerArn": {
+                    "Ref": "ALB"
+                },
+                "Port": 8080,
+                "Protocol": "HTTP"
+            }
+        },
+        "TCPlistener1": {
+            "Type": "AWS::ElasticLoadBalancingV2::Listener",
+            "Properties": {
+                "DefaultActions": [
+                    {
+                        "Type": "forward",
+                        "TargetGroupArn": {
+                            "Ref": "MyTargetGroup1"
+                        }
+                    }
+                ],
+                "LoadBalancerArn": {
+                    "Ref": "NLB"
+                },
+                "Port": 22,
+                "Protocol": "TCP"
+            }
+        },
+        "UsersTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+                "TableName": "users",
+                "AttributeDefinitions": [
+                    {
+                        "AttributeName": "id",
+                        "AttributeType": "S"
+                    }
+                ],
+                "KeySchema": [
+                    {
+                        "AttributeName": "id",
+                        "KeyType": "HASH"
+                    }
+                ],
+                "TimeToLiveSpecification": {
+                    "AttributeName": "ExpirationTime",
+                    "Enabled": true
+                },
+                "ProvisionedThroughput": {
+                    "ReadCapacityUnits": "10",
+                    "WriteCapacityUnits": "10"
+                }
+            }
+        },
+        "RestaurantsTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+                "TableName": "restaurants",
+                "AttributeDefinitions": [
+                    {
+                        "AttributeName": "id",
+                        "AttributeType": "S"
+                    }
+                ],
+                "KeySchema": [
+                    {
+                        "AttributeName": "id",
+                        "KeyType": "HASH"
+                    }
+                ],
+                "TimeToLiveSpecification": {
+                    "AttributeName": "ExpirationTime",
+                    "Enabled": true
+                },
+                "ProvisionedThroughput": {
+                    "ReadCapacityUnits": "10",
+                    "WriteCapacityUnits": "10"
+                }
+            },
+            "DependsOn": [
+                "UsersTable"
+            ]
+        },
+        "MenuTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+                "TableName": "menu",
+                "AttributeDefinitions": [
+                    {
+                        "AttributeName": "itemID",
+                        "AttributeType": "S"
+                    }
+                ],
+                "KeySchema": [
+                    {
+                        "AttributeName": "itemID",
+                        "KeyType": "HASH"
+                    }
+                ],
+                "TimeToLiveSpecification": {
+                    "AttributeName": "ExpirationTime",
+                    "Enabled": true
+                },
+                "ProvisionedThroughput": {
+                    "ReadCapacityUnits": "10",
+                    "WriteCapacityUnits": "10"
+                }
+            },
+            "DependsOn": [
+                "RestaurantsTable"
+            ]
+        },
+        "OrderHistoryTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+                "TableName": "orderHistory",
+                "AttributeDefinitions": [
+                    {
+                        "AttributeName": "orderID",
+                        "AttributeType": "S"
+                    }
+                ],
+                "KeySchema": [
+                    {
+                        "AttributeName": "orderID",
+                        "KeyType": "HASH"
+                    }
+                ],
+                "TimeToLiveSpecification": {
+                    "AttributeName": "ExpirationTime",
+                    "Enabled": true
+                },
+                "ProvisionedThroughput": {
+                    "ReadCapacityUnits": "10",
+                    "WriteCapacityUnits": "10"
+                }
+            },
+            "DependsOn": [
+                "MenuTable"
+            ]
+        },
+        "SendMessageLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "FunctionName": "sendMessage",
+                "Code": {
+                    "ZipFile": "const AWSSNS = require(\"aws-sdk\");\nconst sns = new AWSSNS.SNS();\nasync function sendMessage(Message,Subject,PhoneNumber){\n  try {\n    var params = {\n      Message: Message,\n      Subject: Subject,\n      PhoneNumber: '+1'+PhoneNumber\n    }\n    const data = await sns.publish(params).promise();\n    console.log(data)\n    return data\n  } catch(err){\n    return err\n  }\n};\n\nexports.handler = async (event, context) => {\n  try {\n    const data = await sendMessage(event.Message,event.Subject,event.PhoneNumber)\n    return { body: data }\n  } catch(err){\n    return { error: err }\n  }\n};\n"
+                },
+                "Description": "Function to send messages to the previously verified numbers.",
+                "Handler": "index.handler",
+                "Role": "arn:aws:iam::326398109931:role/LabRole",
+                "Runtime": "nodejs14.x",
+                "Timeout": 300
+            }
+        },
+        "FetchAllVerifiedNumbersLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "FunctionName": "fetchAllVerifiedNumbers",
+                "Code": {
+                    "ZipFile": "const AWSSNS = require(\"aws-sdk\");\nconst sns = new AWSSNS.SNS();\nasync function verifyNumber(){\n  try {\n    var params = {\n      MaxResults: 10\n    };\n    const data = await sns.listSMSSandboxPhoneNumbers(params).promise();\n    return data\n  } catch (err) {\n    return err\n  }\n}\nexports.handler = async (event, context) => {\n  try {\n    const data = await verifyNumber()\n    return data.PhoneNumbers \n  } catch (err) {\n    return { error: err }\n  }\n};\n"
+                },
+                "Description": "Function to fetch all the verified numbers.",
+                "Handler": "index.handler",
+                "Role": "arn:aws:iam::326398109931:role/LabRole",
+                "Runtime": "nodejs14.x",
+                "Timeout": 300
+            }
+        },
+        "AddPhoneNumbersLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "FunctionName": "addPhoneNumber",
+                "Code": {
+                    "ZipFile": "const AWSSNS = require(\"aws-sdk\");\nconst sns = new AWSSNS.SNS();\nasync function addPhNum(phoneNumber){\n  try {\n    var params = {\n      PhoneNumber: '+1'+phoneNumber,\n      LanguageCode: 'en-US'\n    };\n    const data = await sns.createSMSSandboxPhoneNumber(params).promise();\n    console.log(data)\n    return data\n  } catch (err) {\n    return err\n  }\n};\n\nexports.handler = async (event, context) => {\n  try {\n    const data = await addPhNum(event.PhoneNumber)\n    return { body: data }\n  } catch (err) {\n    return { error: err }\n  }\n};\n"
+                },
+                "Description": "Function to add phone numbers.",
+                "Handler": "index.handler",
+                "Role": "arn:aws:iam::326398109931:role/LabRole",
+                "Runtime": "nodejs14.x",
+                "Timeout": 300
+            }
+        },
+        "VerifyPhoneNumbersLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "FunctionName": "verifyPhoneNumber",
+                "Code": {
+                    "ZipFile": "const AWSSNS = require(\"aws-sdk\");\nconst sns = new AWSSNS.SNS();\nasync function verifyPhoneNumber(PhoneNumber,OneTimePassword){\n  try {\n    var params = {\n      PhoneNumber: '+1'+PhoneNumber, /* required */\n      OneTimePassword: OneTimePassword\n    };\n    const data = await sns.verifySMSSandboxPhoneNumber(params).promise();\n    console.log(data)\n    return data\n  } catch (err) {\n    return err\n  }\n};\n\nexports.handler = async (event, context) => {\n  try {\n    const data = await verifyPhoneNumber(event.PhoneNumber,event.OneTimePassword)\n    return { body: data }\n  } catch (err) {\n    return { error: err }\n  }\n};\n"
+                },
+                "Description": "Function to verify the added numbers.",
+                "Handler": "index.handler",
+                "Role": "arn:aws:iam::326398109931:role/LabRole",
+                "Runtime": "nodejs14.x",
+                "Timeout": 300
+            }
+        }
+    }
+}
