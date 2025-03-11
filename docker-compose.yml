@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  container1:
+    image: alishankhawaja/backend:v1
+    ports:
+      - 5000:5000
+    networks:
+      - kravingapp
+  container2:
+    image: alishankhawaja/frontend:v1
+    ports:
+      - 4200:80
+    networks:
+      - kravingapp
+networks:
+  kravingapp:
