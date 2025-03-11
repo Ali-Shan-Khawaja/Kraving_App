@@ -1,0 +1,24 @@
+<div class="card mb-3">
+    <div class="row no-gutters">
+      <div class="col-md-4">
+        <img src="{{restaurant.ImageURL}}" class="card-img" alt="{{restaurant.ImageURL}}">
+      </div>
+      <div class="col-md-8">
+        <div class="card-body">
+          <h5 class="card-title">{{restaurant.Name}}</h5>
+          <p class="card-text">{{restaurant.Description}}</p>
+          <p class="card-text">Famous Cuisine</p>
+          <ul>
+              <li *ngFor="let item of restaurant.Cuisine">
+                  {{item}}
+              </li>
+          </ul>
+          <p class="card-text"><small class="text-muted">Location: {{restaurant.Address}}</small></p>
+          <!-- <a href="/restaurant/{{restaurant.id}}" class="btn btn-success btn-block">Details</a> -->
+          <a (click)="detail(restaurant.id)" class="btn btn-success btn-block">Details</a>
+          <button href="javascript:void(0);"*ngIf="(authService.currentUser$  | async)?.isAdmin" type="submit" (click)="deleteRestaurant(restaurant.id)" class="btn btn-danger btn-block">Delete</button>
+          <!-- <a *ngIf="(authService.currentUser$  | async)?.isAdmin" href="/restaurant-edit/{{restaurant.id}}" class="btn btn-default btn-block">Edit</a> -->
+        </div>
+      </div>
+    </div>
+  </div>

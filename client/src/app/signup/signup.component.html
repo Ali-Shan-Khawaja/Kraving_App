@@ -1,0 +1,121 @@
+<h1 style="position: absolute; left: 45%; top: 15%">Kraving</h1>
+<form #signupForm="ngForm" (ngSubmit)="signupSubmit()" class="custom-form" style="position: relative">
+  <div class="form-group">
+    <label for="username">Name</label>
+    <input
+      [(ngModel)]="signupModel.name"
+      name="username"
+      type="text"
+      class="form-control"
+      id="username"
+      #username="ngModel"
+      required
+      placeholder="Enter Name"
+    />
+    <div *ngIf="username.touched && !username.valid" class="alert alert-danger">
+      <div *ngIf="username.errors.required">Name is required.</div>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="exampleInputEmail1">Email address</label>
+    <input
+      [(ngModel)]="signupModel.email"
+      name="email"
+      type="email"
+      class="form-control"
+      id="exampleInputEmail1"
+      #email="ngModel"
+      aria-describedby="emailHelp"
+      required
+      placeholder="Enter email"
+    />
+    <div *ngIf="email.touched && !email.valid" class="alert alert-danger">Email is required</div>
+    <small id="emailHelp" class="form-text text-muted"
+      >We'll never share your email with anyone else.</small
+    >
+  </div>
+  <div class="form-group">
+    <label for="exampleInputPassword1">Password</label>
+    <input
+      [(ngModel)]="signupModel.password"
+      name="password"
+      type="password"
+      class="form-control"
+      #password="ngModel"
+      id="exampleInputPassword1"
+      required
+      placeholder="Password"
+    />
+    <div *ngIf="password.touched && !password.valid" class="alert alert-danger">Password is required</div>
+  </div>
+  <div class="form-group">
+    <label for="exampleInputPassword1">Confirm Password</label>
+    <input
+      [(ngModel)]="signupModel.confirmPassword"
+      name="cpassword"
+      type="password"
+      class="form-control"
+      #cpassword="ngModel"
+      id="exampleInputPassword1"
+      required
+      placeholder="Password"
+    />
+    <div *ngIf="cpassword.touched && !cpassword.valid" class="alert alert-danger">Confirm Password is required</div>
+  </div>
+  <div class="form-group">
+    <label for="username">Gender</label>
+    <select class="form-control" [(ngModel)]="signupModel.gender" name="gender" #gender="ngModel" required id="gender">
+      <option value=""></option>
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+    </select>
+    <div *ngIf="gender.touched && !gender.valid" class="alert alert-danger">
+      <div *ngIf="gender.errors.required">Gender is required.</div>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="number">Phone Number</label>
+    <input
+      [(ngModel)]="signupModel.number"
+      name="number"
+      type="text"
+      class="form-control"
+      id="number"
+      #number="ngModel"
+      pattern="^[0-9]+$"
+      minlength="10"
+      maxlength="10"
+      required
+      placeholder="Enter Phone Number"
+    />
+    <div *ngIf="number.touched && !number.valid" class="alert alert-danger">
+      <div *ngIf="number.errors.required">Phone Number is required.</div>
+      <div *ngIf="number.errors.pattern">Phone Number should only contains numbers</div>
+      <div *ngIf="number.errors.minlength">Phone Number should be of 10 numbers</div>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="address">Address</label>
+    <input
+      [(ngModel)]="signupModel.address"
+      name="address"
+      type="text"
+      class="form-control"
+      id="address"
+      #address="ngModel"
+      required
+      placeholder="Enter Address"
+    />
+    <div *ngIf="address.touched && !address.valid" class="alert alert-danger">
+      <div *ngIf="address.errors.required">Address is required.</div>
+    </div>
+  </div>
+  <button
+    type="submit"
+    class="btn btn-primary btn-block"
+    [disabled]="!signupForm.valid"
+  >
+    Sign Up
+  </button>
+  <a class="btn btn-default btn-block" routerLink="/">Login</a>
+</form>

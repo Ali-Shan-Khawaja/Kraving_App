@@ -1,0 +1,19 @@
+{
+    "cognito": {
+        "userPoolId": "us-east-1_XpaopTbAK",
+        "clientId": "38pfgehf3hij58875vrfm9hlgo"
+    },
+    "awsConfig" : {
+        "region": "us-east-1",
+        "accessKeyId": "ASIA2JTTWNVJTAF36CUX", 
+        "secretAccessKey": "WM3ZBJinJM8Z0MAvNxLgj1eL5kYalZTDEtC7VNKd",
+        "sessionToken": "FwoGZXIvYXdzECQaDMCe6652BiloUf1BxCLAAUr5K1M0rEgmI7w4nUyyjnDpEDpYMRLFDmF2hWMY63SdlP4WHB9/uO59QjFp1rRhNEbSN/ppPjf1LmsJVTbTEJ4g+Yc2d3z3+myBHp17Sh553fS32hTIOUpFXpJjvtM/6CdTqemJeTaJDe4iuwYTAjfII8184TDk7njOBJ89OYeKs7APAKCkwiLAVe55SinWXMa3hSJUUNIrvqZsiSdvEvT0rCyG1UEi8+hyXQ5fB21JDuBktF7T+fs5O1NHTHmLISjRsLeSBjIt1ueRbkvJGtCHIKSUJ+t8Jaq8/CWz9KtN6zfooPhZWcS9B8eT+pZ5Znnoy5Ay"
+    },
+    "awsSNSConfig" : {
+        "region": "us-east-1",
+        "endpoint": "http://dynamodb.us-east-1.amazonaws.com", 
+        "accessKeyId": "ASIA2JTTWNVJTAF36CUX", 
+        "secretAccessKey": "WM3ZBJinJM8Z0MAvNxLgj1eL5kYalZTDEtC7VNKd",
+        "sessionToken": "FwoGZXIvYXdzECQaDMCe6652BiloUf1BxCLAAUr5K1M0rEgmI7w4nUyyjnDpEDpYMRLFDmF2hWMY63SdlP4WHB9/uO59QjFp1rRhNEbSN/ppPjf1LmsJVTbTEJ4g+Yc2d3z3+myBHp17Sh553fS32hTIOUpFXpJjvtM/6CdTqemJeTaJDe4iuwYTAjfII8184TDk7njOBJ89OYeKs7APAKCkwiLAVe55SinWXMa3hSJUUNIrvqZsiSdvEvT0rCyG1UEi8+hyXQ5fB21JDuBktF7T+fs5O1NHTHmLISjRsLeSBjIt1ueRbkvJGtCHIKSUJ+t8Jaq8/CWz9KtN6zfooPhZWcS9B8eT+pZ5Znnoy5Ay"
+    }
+}

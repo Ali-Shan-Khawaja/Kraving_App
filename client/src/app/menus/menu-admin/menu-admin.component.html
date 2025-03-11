@@ -1,0 +1,41 @@
+
+
+<h2 style="margin: 0 auto;width: 25%;margin-top: 20px;margin-bottom: 20px;">Add Menu</h2>
+<div class="row custom-edit-form">
+
+  <div class="col-md-8">
+        <form (ngSubmit)="addMenu()" #addForm="ngForm">
+            <div class="mb-3">
+              <label  for="itemName" class="form-label">Menu Name</label>
+              <input [(ngModel)]="model.itemName" name="Name" type="text" class="form-control" id="itemName">
+            </div>
+            <div class="mb-3">
+              <label for="itemCuisine" class="form-label">Menu Cuisine</label>
+              <input [(ngModel)]="model.itemCuisine" name="itemCuisine"  type="text" class="form-control" id="itemCuisine">
+            </div>
+            <div class="mb-3">
+                <label for="itemUnitPrice" class="form-label">Price</label>
+                <input [(ngModel)]="model.itemUnitPrice" name="Price" type="number" class="form-control" id="itemUnitPrice">
+            </div>
+            <div class="mb-3">
+                <label for="itemPictureURL" class="form-label">Image Url</label>
+                <input [(ngModel)]="model.itemPictureURL" name="ImageURL" type="text" class="form-control" id="itemPictureURL">
+            </div> 
+            <div class="mb-3">
+                <label for="restaurantID" class="form-label">Resturant ID</label>
+                <input [(ngModel)]="model.restaurantID" disabled name="restaurantID" type="text" class="form-control" id="restaurantID">
+            </div> 
+            <button type="submit" class="btn btn-primary">Add</button>
+          </form>
+    </div>
+    <div class="col-md-4">
+        <div class="card" style="width: 18rem;">
+            <img src={{model.itemPictureURL}} class="card-img-top" alt="...">
+            <div class="card-body">
+              <h5 class="card-title">{{model.itemName}}</h5>
+              <p class="card-text">{{model.itemCuisine}}</p>
+              <p class="card-text">{{model.itemUnitPrice}}</p>
+            </div>
+          </div>
+    </div>
+</div>

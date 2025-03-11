@@ -1,0 +1,26 @@
+<div class="food">
+    <div class="container">
+       <div class="row">
+          <div class="col-md-12">
+             <div class="titlepage">
+                <h2>{{restaurant.Name}}</h2>
+                <span>{{restaurant.Description}}</span>
+                <button *ngIf="(authService.currentUser$  | async)?.isAdmin" class="btn btn-success" (click)="addMenu()">Add Menu</button>
+             </div>
+          </div>
+       </div>
+       <div class="row">
+          <div class="col-md-4" *ngFor="let menu of menuList">
+             <div class="food_box" >
+                <i><img src="{{menu.itemPictureURL}}" alt="#"/></i>
+                <h4>{{menu.itemName}}</h4>
+                <p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable</p>
+                <p>Cuisine: {{menu.itemCuisine}}</p>
+                <p>Price: {{menu.itemUnitPrice}}</p>
+                <button class="btn btn-success btn-block" (click)="addToCart(menu)">Add to cart</button>
+                <button href="javascript:void(0);"*ngIf="(authService.currentUser$  | async)?.isAdmin" type="submit" (click)="deleteMenu(menu.itemID)" class="btn btn-danger btn-block">Delete Menu</button>
+             </div>
+          </div>
+       </div>
+    </div>
+ </div>

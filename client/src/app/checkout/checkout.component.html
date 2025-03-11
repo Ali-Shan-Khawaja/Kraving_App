@@ -1,0 +1,28 @@
+
+<h2 style="margin:5% auto;width:75%">Check Out Page</h2>
+<table class="table table-hover table-bordered" style="margin:5% auto;width:75%">
+    <thead>
+        <tr>
+          <th scope="col">Item Name</th>
+          <th scope="col">Base Price</th>
+          <th scope="col">Qty</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of orderList">
+          <td style="width: 35%;"><img src="{{item.itemPictureURL}}" style="width: 20%;"/>  {{item.itemName}}</td>
+          <td>{{item.itemUnitPrice}}</td>
+          <td>{{item.qty}}</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>{{totalPrice | number}}</td>
+          <td>{{qty}}</td>
+        </tr>
+      </tbody>
+</table>
+
+<div class="checkout-btns">
+  <button class="btn btn-default" (click)="clearCart()">Clear Cart</button>
+  <button class="btn btn-success" (click)="checkout()">Checkout</button>
+</div>

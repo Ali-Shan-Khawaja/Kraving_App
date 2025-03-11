@@ -1,0 +1,37 @@
+
+
+<h2 style="margin: 0 auto;width: 25%;margin-top: 20px;margin-bottom: 20px;">Edit Restuarant</h2>
+<div class="row custom-edit-form">
+
+  <div class="col-md-8">
+        <form (ngSubmit)="editRestaurant()" #editForm="ngForm">
+            <div class="mb-3">
+              <label  for="restaurantName" class="form-label">Restaurant Name</label>
+              <input [(ngModel)]="model.Name" name="Name" type="text" class="form-control" id="restaurantName">
+            </div>
+            <div class="mb-3">
+              <label for="restaurantDescripton" class="form-label">Restaurant Description</label>
+              <input [(ngModel)]="model.Description" name="Description"  type="text" class="form-control" id="restaurantDescripton">
+            </div>
+            <div class="mb-3">
+                <label for="restaurantLocation" class="form-label">Restaurant Location</label>
+                <input [(ngModel)]="model.Address" name="Address" type="text" class="form-control" id="restaurantLocation">
+              </div>
+            <div class="mb-3">
+                <label for="restaurantUrl" class="form-label">Image Url</label>
+                <input [(ngModel)]="model.ImageURL" name="ImageURL" type="text" class="form-control" id="restaurantUrl">
+            </div> 
+            <button type="submit" class="btn btn-primary">Update</button>
+          </form>
+    </div>
+    <div class="col-md-4">
+        <div class="card" style="width: 18rem;">
+            <img src={{model.ImageURL}} class="card-img-top" alt="...">
+            <div class="card-body">
+              <h5 class="card-title">{{model.Name}}</h5>
+              <p class="card-text">{{model.Description}}</p>
+              <p class="card-text">{{model.Address}}</p>
+            </div>
+          </div>
+    </div>
+</div>
